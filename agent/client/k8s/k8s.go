@@ -12,7 +12,7 @@ import (
 var _ K8sClient = (*k8sClient)(nil)
 
 type K8sClient interface {
-	listPod(ctx context.Context, label string) (watch.Interface, error)
+	ListPod(ctx context.Context, label string) (watch.Interface, error)
 }
 
 type k8sClient struct {
@@ -38,7 +38,7 @@ func NewClient() (K8sClient, error) {
 }
 
 // listPod implements K8sClient.
-func (k *k8sClient) listPod(ctx context.Context, label string) (watch.Interface, error) {
+func (k *k8sClient) ListPod(ctx context.Context, label string) (watch.Interface, error) {
 	t := true
 	return k.client.CoreV1().Pods("").Watch(ctx, metav1.ListOptions{
 		LabelSelector:        label,

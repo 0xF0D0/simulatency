@@ -40,19 +40,18 @@ func (a *simulatencyAgent) RunWatchLabel(label string) error {
 	return nil
 }
 
-func (a * simulatencyAgent) updateEbpfMap(list []podwatcher.Pod) error {
-	//Insert and Delete and Update ips
-	for _, pod := range list  {
-		if val, exist := pod.Annotations[annotationKey]; exist {
-			key, err := strconv.Atoi(val)
-			if err != nil {
-				log.Println("string: " + val + "is not convertible to integer")
-				continue
-			}
-			ipValue := binary.NativeEndian.Uint32(pod.Ip)
-			a.ebpfMap.Put(uint32(key), ipValue)
-		}
+func (a * simulatencyAgent) updateEbpfMap(pod podwatcher.Pod, isAdd bool) error {
+	if !isAdd {
+		err := a.ebpfMap.Delete(binary.NativeEndian.Uint32(pod.Ip))
+		return err
 	}
 
+	if val, exist := pod.Annotations[annotationKey]; exist {
+		key, err := strconv.Atoi(val)
+		if err != nil {
+			log.Println("string: " + val + "is not convertible to integer")
+		}
+		return a.ebpfMap.Put(uint32(key), binary.NativeEndian.Uint32(pod.Ip))
+	}
 	return nil
 }

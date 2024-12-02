@@ -22,6 +22,7 @@ func init() {
 type EbpfMap interface {
 	Lookup(uint32) (uint32, error)
 	Put(k, v uint32) error
+	Delete(k uint32) error
 }
 
 type SimulatencyEBPFModule struct {
@@ -71,4 +72,9 @@ func (m *SimulatencyEBPFModule) Lookup(key uint32) (uint32, error) {
 // Put implements EbpfMap.
 func (m *SimulatencyEBPFModule) Put(k uint32, v uint32) error {
 	return m.objs.IpTagMap.Put(k, v)
+}
+
+// Delete implements EbpfMap.
+func (m *SimulatencyEBPFModule) Delete(k uint32) error {
+	return m.objs.IpTagMap.Delete(k)
 }
