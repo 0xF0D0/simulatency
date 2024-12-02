@@ -5,10 +5,10 @@ import (
 )
 
 type Pod struct {
-	name string
-	ip net.IP
-	labels map[string] string
-	annotations map[string] string
+	Name string
+	Ip net.IP
+	Labels map[string] string
+	Annotations map[string] string
 }
 
 type PodWatcher interface {

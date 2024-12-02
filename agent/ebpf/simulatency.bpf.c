@@ -42,8 +42,8 @@ int classify_tcp(struct __sk_buff *skb) {
     if (ip->protocol != IPPROTO_TCP)
         return TC_ACT_OK;
 
-    __u32 src_ip = ip->saddr;
-    __u32 dest_ip = ip->daddr;
+    __u32 src_ip = bpf_ntohs(ip->saddr);
+    __u32 dest_ip = bpf_ntohs(ip->daddr);
 
     // Lookup source IP in the map
     __u32 *src_value = bpf_map_lookup_elem(&ip_tag_map, &src_ip);
