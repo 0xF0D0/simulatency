@@ -1,11 +1,8 @@
 package agent
 
 import (
-	"encoding/binary"
-	"log"
-	"strconv"
-
 	"github.com/0xf0d0/simulatency-agent/ebpf"
+	"github.com/0xf0d0/simulatency-agent/util"
 	podwatcher "github.com/0xf0d0/simulatency-agent/watcher/pod"
 )
 
@@ -24,34 +21,21 @@ type Agent interface {
 type simulatencyAgent struct {
 	k8sWatcher podwatcher.PodWatcher
 	ebpfMap ebpf.EbpfMap
+	distanceMap util.CombinationMap
 }
 
 func InitializeAgent(watcher podwatcher.PodWatcher, ebpfMap ebpf.EbpfMap) (Agent) {
 	a := &simulatencyAgent{
-		k8sWatcher: watcher,
-		ebpfMap:    ebpfMap,
+		k8sWatcher:  watcher,
+		ebpfMap:     ebpfMap,
+		distanceMap: util.NewCombinationMap(),
 	}
 	watcher.SetHandler(a.updateEbpfMap)
+	watcher.SetHandler(a.injectDelays)
 	return a
 }
 
 func (a *simulatencyAgent) RunWatchLabel(label string) error {
 	a.k8sWatcher.RunWatch(label) //TODO: may be add some ctx cancel logic?
-	return nil
-}
-
-func (a * simulatencyAgent) updateEbpfMap(pod podwatcher.Pod, isAdd bool) error {
-	if !isAdd {
-		err := a.ebpfMap.Delete(binary.NativeEndian.Uint32(pod.Ip))
-		return err
-	}
-
-	if val, exist := pod.Annotations[annotationKey]; exist {
-		key, err := strconv.Atoi(val)
-		if err != nil {
-			log.Println("string: " + val + "is not convertible to integer")
-		}
-		return a.ebpfMap.Put(uint32(key), binary.NativeEndian.Uint32(pod.Ip))
-	}
 	return nil
 }
